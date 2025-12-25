@@ -16,7 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Package, LogOut, Loader2, Plus, Pencil, Trash2, Upload, Image as ImageIcon, Users, Mail, Phone, Calendar, CheckCircle2, MessageCircle, X } from 'lucide-react';
 import { useGetAllOrders, useUpdateOrderStatus, useDeleteOrder, useGetAllProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateProductStock, useGetAllLeads, useMarkLeadAsContacted, useDeleteLead, useGetAllWhatsAppContacts, useMarkWhatsAppContactAsContacted, useDeleteWhatsAppContact, useGetLogo, useUpdateLogo, useGetAllGalleryImages, useAddGalleryImage, useUpdateGalleryImage, useDeleteGalleryImage } from '../hooks/useQueries';
 import { OrderStatusEnum, Product, SaleMethod, Lead, ProductCombinationType, ShippingCarrier } from '../backend';
-import { ExternalBlob } from '../backend';
+import type { ExternalBlob } from '../backend';
 import { toast } from 'sonner';
 import FadeIn from '../components/FadeIn';
 import type { WhatsAppContact } from '../hooks/useQueries';
