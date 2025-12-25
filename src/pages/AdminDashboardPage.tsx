@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Package, LogOut, Loader2, Plus, Pencil, Trash2, Upload, Image as ImageIcon, Users, Mail, Phone, Calendar, CheckCircle2, MessageCircle, X } from 'lucide-react';
+import { ShieldCheck, Package, LogOut, Loader as Loader2, Plus, Pencil, Trash2, Upload, Image as ImageIcon, Users, Mail, Phone, Calendar, CircleCheck as CheckCircle2, MessageCircle, X } from 'lucide-react';
 import { useGetAllOrders, useUpdateOrderStatus, useDeleteOrder, useGetAllProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateProductStock, useGetAllLeads, useMarkLeadAsContacted, useDeleteLead, useGetAllWhatsAppContacts, useMarkWhatsAppContactAsContacted, useDeleteWhatsAppContact, useGetLogo, useUpdateLogo, useGetAllGalleryImages, useAddGalleryImage, useUpdateGalleryImage, useDeleteGalleryImage } from '../hooks/useQueries';
 import { OrderStatusEnum, Product, SaleMethod, Lead, ProductCombinationType, ShippingCarrier } from '../backend';
 import type { ExternalBlob } from '../backend';
