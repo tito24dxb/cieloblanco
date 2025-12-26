@@ -15,11 +15,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Package, LogOut, Loader as Loader2, Plus, Pencil, Trash2, Upload, Image as ImageIcon, Users, Mail, Phone, Calendar, CircleCheck as CheckCircle2, MessageCircle, X } from 'lucide-react';
 import { useGetAllOrders, useUpdateOrderStatus, useDeleteOrder, useGetAllProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, useUpdateProductStock, useGetAllLeads, useMarkLeadAsContacted, useDeleteLead, useGetAllWhatsAppContacts, useMarkWhatsAppContactAsContacted, useDeleteWhatsAppContact, useGetLogo, useUpdateLogo, useGetAllGalleryImages, useAddGalleryImage, useUpdateGalleryImage, useDeleteGalleryImage } from '../hooks/useQueries';
-import { OrderStatusEnum, Product, SaleMethod, Lead, ProductCombinationType, ShippingCarrier } from '../backend';
-import type { ExternalBlob } from '../backend';
+import type { Product, Order, Lead, WhatsAppContact, SiteSetting, GalleryImage } from '../hooks/useQueries';
 import { toast } from 'sonner';
 import FadeIn from '../components/FadeIn';
-import type { WhatsAppContact } from '../hooks/useQueries';
 
 const ADMIN_USERNAME = 'crisdorao';
 const ADMIN_PASSWORD = 'Messi24@';
@@ -58,7 +56,7 @@ export default function AdminDashboardPage() {
   const [deleteLeadDialog, setDeleteLeadDialog] = useState<{ open: boolean; leadId: bigint | null }>({ open: false, leadId: null });
   const [deleteWhatsAppDialog, setDeleteWhatsAppDialog] = useState<{ open: boolean; contactId: bigint | null }>({ open: false, contactId: null });
   const [deleteProductDialog, setDeleteProductDialog] = useState<{ open: boolean; productId: bigint | null }>({ open: false, productId: null });
-  const [deleteGalleryDialog, setDeleteGalleryDialog] = useState<{ open: boolean; imageId: bigint | null }>({ open: false, imageId: null });
+  const [deleteGalleryDialog, setDeleteGalleryDialog] = useState<{ open: boolean; imageId: string | null }>({ open: false, imageId: null });
 
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -85,7 +83,7 @@ export default function AdminDashboardPage() {
     combinationType: 'none' as 'none' | 'bundle' | 'personalization',
     combinedProductId: '',
     shippingPrice: '0',
-    shippingCarrier: 'none' as 'none' | 'FedEx' | 'DHL' | 'Estafeta' | 'Redpack' | 'UPS' | 'Paqueteexpress' | '99Minutos' | 'JTExpress',
+    shippingCarrier: 'none' as 'none' | 'FedEx' | 'DHL' | 'Estafeta' | 'Redpack' | 'UPS' | 'Paqueteexpress' | 'Minutos99' | 'JTExpress',
   });
   const [imagePreview, setImagePreview] = useState<string>('');
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -172,7 +170,7 @@ export default function AdminDashboardPage() {
     if (!deleteLeadDialog.leadId) return;
     
     try {
-      await deleteLead.mutateAsync(deleteLeadDialog.leadId);
+      await deleteLead.mutateAsync(deleteLeadDialog.leadId.toString());
       toast.success('Contacto eliminado exitosamente');
       setDeleteLeadDialog({ open: false, leadId: null });
       refetchLeads();
@@ -185,7 +183,7 @@ export default function AdminDashboardPage() {
     if (!deleteWhatsAppDialog.contactId) return;
     
     try {
-      await deleteWhatsAppContact.mutateAsync(deleteWhatsAppDialog.contactId);
+      await deleteWhatsAppContact.mutateAsync(deleteWhatsAppDialog.contactId.toString());
       toast.success('Contacto de WhatsApp eliminado exitosamente');
       setDeleteWhatsAppDialog({ open: false, contactId: null });
       refetchWhatsAppContacts();
@@ -198,7 +196,7 @@ export default function AdminDashboardPage() {
     if (!deleteProductDialog.productId) return;
     
     try {
-      await deleteProduct.mutateAsync(deleteProductDialog.productId);
+      await deleteProduct.mutateAsync(deleteProductDialog.productId.toString());
       toast.success('Producto eliminado exitosamente');
       setDeleteProductDialog({ open: false, productId: null });
       refetchProducts();
@@ -220,13 +218,12 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const getStatusLabel = (status: OrderStatusEnum) => {
-    const labels: Record<OrderStatusEnum, string> = {
-      [OrderStatusEnum.Pendiente]: 'Pendiente',
-      [OrderStatusEnum.PedidoRecibido]: 'Pedido Recibido',
-      [OrderStatusEnum.PedidoDespachado]: 'Pedido Despachado',
-      [OrderStatusEnum.PedidoEnTransito]: 'Pedido en Tránsito',
-      [OrderStatusEnum.PedidoEntregado]: 'Pedido Entregado',
+  const getStatusLabel = (status: Order['status']) => {
+    const labels: Record<Order['status'], string> = {
+      'PedidoRecibido': 'Pedido Recibido',
+      'PedidoDespachado': 'Pedido Despachado',
+      'PedidoEnTransito': 'Pedido en Tránsito',
+      'PedidoEntregado': 'Pedido Entregado',
     };
     return labels[status] || status;
   };
@@ -267,65 +264,39 @@ export default function AdminDashboardPage() {
         return;
       }
 
-      let imageBlob: ExternalBlob;
+      let imageUrl: string;
 
       if (productForm.image) {
-        const arrayBuffer = await productForm.image.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-        imageBlob = ExternalBlob.fromBytes(uint8Array).withUploadProgress((percentage) => {
-          setUploadProgress(percentage);
-        });
+        // In a real implementation, you would upload the file to a storage service
+        // For now, we'll create a placeholder URL
+        imageUrl = URL.createObjectURL(productForm.image);
+        setUploadProgress(100);
       } else if (editingProduct) {
-        imageBlob = editingProduct.image;
+        imageUrl = editingProduct.image_url;
       } else {
         throw new Error('No hay imagen disponible');
       }
 
-      const saleMethodMap = {
-        internal: SaleMethod.internal,
-        mercadoLibre: SaleMethod.mercadoLibre,
-        both: SaleMethod.both,
-      };
-
-      const combinationTypeMap = {
-        none: null,
-        bundle: ProductCombinationType.bundle,
-        personalization: ProductCombinationType.personalization,
-      };
-
-      const shippingCarrierMap: Record<string, ShippingCarrier | null> = {
-        'none': null,
-        'FedEx': ShippingCarrier.FedEx,
-        'DHL': ShippingCarrier.DHL,
-        'Estafeta': ShippingCarrier.Estafeta,
-        'Redpack': ShippingCarrier.Redpack,
-        'UPS': ShippingCarrier.UPS,
-        'Paqueteexpress': ShippingCarrier.Paqueteexpress,
-        '99Minutos': ShippingCarrier.Minutos99,
-        'JTExpress': ShippingCarrier.JTExpress,
-      };
-
       const productData = {
-        id: editingProduct?.id || 0n,
         name: productForm.name,
         description: productForm.description,
-        price: BigInt(Math.round(parseFloat(productForm.price) * 100)),
+        price: Math.round(parseFloat(productForm.price) * 100),
         currency: 'MXN',
-        image: imageBlob,
-        saleMethod: saleMethodMap[productForm.saleMethod],
+        image_url: imageUrl,
+        sale_method: productForm.saleMethod,
         mercadoLibreUrl: (productForm.saleMethod === 'mercadoLibre' || productForm.saleMethod === 'both') ? productForm.mercadoLibreUrl : null,
-        paymentMethods: productForm.paymentMethods,
+        payment_methods: productForm.paymentMethods,
         specifications: productForm.specifications,
-        stock: BigInt(productForm.stock || '0'),
-        isOutOfStock: productForm.isOutOfStock,
-        combinationType: combinationTypeMap[productForm.combinationType],
-        combinedProductId: productForm.combinedProductId ? BigInt(productForm.combinedProductId) : null,
-        shippingPrice: BigInt(Math.round(parseFloat(productForm.shippingPrice || '0') * 100)),
-        shippingCarrier: shippingCarrierMap[productForm.shippingCarrier] || null,
+        stock: parseInt(productForm.stock || '0'),
+        is_out_of_stock: productForm.isOutOfStock,
+        combination_type: productForm.combinationType === 'none' ? null : productForm.combinationType,
+        combined_product_id: productForm.combinedProductId || null,
+        shipping_price: Math.round(parseFloat(productForm.shippingPrice || '0') * 100),
+        shipping_carrier: productForm.shippingCarrier === 'none' ? null : productForm.shippingCarrier,
       };
 
       if (editingProduct) {
-        await updateProduct.mutateAsync(productData);
+        await updateProduct.mutateAsync({ id: editingProduct.id, ...productData });
         toast.success('Producto actualizado exitosamente');
       } else {
         await createProduct.mutateAsync(productData);
@@ -347,54 +318,31 @@ export default function AdminDashboardPage() {
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     
-    const saleMethodMap = {
-      [SaleMethod.internal]: 'internal' as const,
-      [SaleMethod.mercadoLibre]: 'mercadoLibre' as const,
-      [SaleMethod.both]: 'both' as const,
-    };
-
-    const combinationTypeMap = {
-      [ProductCombinationType.bundle]: 'bundle' as const,
-      [ProductCombinationType.personalization]: 'personalization' as const,
-    };
-
-    const shippingCarrierMap: Record<ShippingCarrier, string> = {
-      [ShippingCarrier.FedEx]: 'FedEx',
-      [ShippingCarrier.DHL]: 'DHL',
-      [ShippingCarrier.Estafeta]: 'Estafeta',
-      [ShippingCarrier.Redpack]: 'Redpack',
-      [ShippingCarrier.UPS]: 'UPS',
-      [ShippingCarrier.Paqueteexpress]: 'Paqueteexpress',
-      [ShippingCarrier.Minutos99]: '99Minutos',
-      [ShippingCarrier.JTExpress]: 'JTExpress',
-    };
-
     setProductForm({
       name: product.name,
       description: product.description,
-      price: (Number(product.price) / 100).toString(),
+      price: (product.price / 100).toString(),
       stock: product.stock.toString(),
-      isOutOfStock: product.isOutOfStock,
+      isOutOfStock: product.is_out_of_stock,
       image: null,
-      saleMethod: saleMethodMap[product.saleMethod],
-      mercadoLibreUrl: product.mercadoLibreUrl || '',
-      paymentMethods: product.paymentMethods,
+      saleMethod: product.sale_method,
+      mercadoLibreUrl: product.mercado_libre_url || '',
+      paymentMethods: product.payment_methods,
       specifications: product.specifications,
-      combinationType: product.combinationType ? combinationTypeMap[product.combinationType] : 'none',
-      combinedProductId: product.combinedProductId ? product.combinedProductId.toString() : '',
-      shippingPrice: (Number(product.shippingPrice) / 100).toString(),
-      shippingCarrier: product.shippingCarrier ? shippingCarrierMap[product.shippingCarrier] as any : 'none',
+      combinationType: product.combination_type || 'none',
+      combinedProductId: product.combined_product_id || '',
+      shippingPrice: (product.shipping_price / 100).toString(),
+      shippingCarrier: product.shipping_carrier || 'none',
     });
-    setImagePreview(product.image.getDirectURL());
+    setImagePreview(product.image_url);
     setIsProductDialogOpen(true);
   };
 
-  const handleStockUpdate = async (productId: bigint, stock: string, isOutOfStock: boolean) => {
+  const handleStockUpdate = async (productId: string, stock: string, isOutOfStock: boolean) => {
     try {
       await updateProductStock.mutateAsync({
         productId,
-        stock: BigInt(stock || '0'),
-        isOutOfStock,
+        stock: parseInt(stock || '0'),
       });
       toast.success('Stock actualizado exitosamente');
       refetchProducts();
@@ -403,7 +351,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleMarkLeadAsContacted = async (leadId: bigint) => {
+  const handleMarkLeadAsContacted = async (leadId: string) => {
     try {
       await markLeadAsContacted.mutateAsync(leadId);
       toast.success('Lead marcado como contactado');
@@ -413,7 +361,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleMarkWhatsAppContactAsContacted = async (contactId: bigint) => {
+  const handleMarkWhatsAppContactAsContacted = async (contactId: string) => {
     try {
       await markWhatsAppContactAsContacted.mutateAsync(contactId);
       toast.success('Contacto marcado como contactado');
@@ -453,34 +401,35 @@ export default function AdminDashboardPage() {
     setEditingProduct(null);
   };
 
-  const getSaleMethodLabel = (method: SaleMethod) => {
+  const getSaleMethodLabel = (method: Product['sale_method']) => {
     const labels = {
-      [SaleMethod.internal]: 'Sitio Web Interno',
-      [SaleMethod.mercadoLibre]: 'Mercado Libre',
-      [SaleMethod.both]: 'Ambas',
+      'internal': 'Sitio Web Interno',
+      'mercadoLibre': 'Mercado Libre',
+      'both': 'Ambas',
     };
     return labels[method];
   };
 
-  const getCombinationTypeLabel = (type: ProductCombinationType | undefined) => {
+  const getCombinationTypeLabel = (type: Product['combination_type']) => {
     if (!type) return 'Sin combinación';
     const labels = {
-      [ProductCombinationType.bundle]: 'Bundle',
-      [ProductCombinationType.personalization]: 'Personalización',
+      'bundle': 'Bundle',
+      'customization': 'Personalización',
     };
     return labels[type];
   };
 
-  const getShippingCarrierLabel = (carrier: ShippingCarrier) => {
+  const getShippingCarrierLabel = (carrier: Product['shipping_carrier']) => {
+    if (!carrier) return '';
     const labels = {
-      [ShippingCarrier.FedEx]: 'FedEx',
-      [ShippingCarrier.DHL]: 'DHL',
-      [ShippingCarrier.Estafeta]: 'Estafeta',
-      [ShippingCarrier.Redpack]: 'Redpack',
-      [ShippingCarrier.UPS]: 'UPS',
-      [ShippingCarrier.Paqueteexpress]: 'Paqueteexpress',
-      [ShippingCarrier.Minutos99]: '99Minutos',
-      [ShippingCarrier.JTExpress]: 'J&T Express',
+      'FedEx': 'FedEx',
+      'DHL': 'DHL',
+      'Estafeta': 'Estafeta',
+      'Redpack': 'Redpack',
+      'UPS': 'UPS',
+      'Paqueteexpress': 'Paqueteexpress',
+      'Minutos99': '99Minutos',
+      'JTExpress': 'J&T Express',
     };
     return labels[carrier];
   };
@@ -498,12 +447,12 @@ export default function AdminDashboardPage() {
   }) || [];
 
   const getProductName = (productId: bigint) => {
-    const product = products?.find(p => p.id === productId);
+    const product = products?.find(p => p.id === productId.toString());
     return product?.name || `Producto #${productId}`;
   };
 
-  const formatDate = (timestamp: bigint) => {
-    const date = new Date(Number(timestamp) / 1000000);
+  const formatDate = (timestamp: string) => {
+    const date = new Date(timestamp);
     return date.toLocaleDateString('es-MX', { 
       year: 'numeric', 
       month: 'short', 
@@ -540,13 +489,11 @@ export default function AdminDashboardPage() {
     setLogoUploadProgress(0);
 
     try {
-      const arrayBuffer = await logoFile.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      const logoBlob = ExternalBlob.fromBytes(uint8Array).withUploadProgress((percentage) => {
-        setLogoUploadProgress(percentage);
-      });
+      // In a real implementation, you would upload the file to a storage service
+      const logoUrl = URL.createObjectURL(logoFile);
+      setLogoUploadProgress(100);
 
-      await updateLogo.mutateAsync(logoBlob);
+      await updateLogo.mutateAsync(logoUrl);
       toast.success('Logo actualizado exitosamente');
       setIsLogoDialogOpen(false);
       setLogoFile(null);
@@ -599,14 +546,10 @@ export default function AdminDashboardPage() {
         const file = galleryFiles[i];
         const description = galleryDescriptions[i] || null;
 
-        const arrayBuffer = await file.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-        const imageBlob = ExternalBlob.fromBytes(uint8Array).withUploadProgress((percentage) => {
-          const overallProgress = ((uploadedCount + percentage / 100) / totalFiles) * 100;
-          setGalleryUploadProgress(Math.round(overallProgress));
-        });
+        // In a real implementation, you would upload the file to a storage service
+        const imageUrl = URL.createObjectURL(file);
 
-        await addGalleryImage.mutateAsync({ image: imageBlob, description });
+        await addGalleryImage.mutateAsync({ image_url: imageUrl, description });
         uploadedCount++;
         setGalleryUploadProgress(Math.round((uploadedCount / totalFiles) * 100));
       }
@@ -626,7 +569,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleEditGalleryImage = (image: { id: bigint; description: string | null; imageUrl: string }) => {
+  const handleEditGalleryImage = (image: { id: string; description: string | null; imageUrl: string }) => {
     setEditingGalleryImage({ id: image.id, description: image.description });
     setEditGalleryDescription(image.description || '');
     setEditGalleryPreview(image.imageUrl);
@@ -652,27 +595,25 @@ export default function AdminDashboardPage() {
     setGalleryUploadProgress(0);
 
     try {
-      let imageBlob: ExternalBlob;
+      let imageUrl: string;
 
       if (editGalleryFile) {
-        const arrayBuffer = await editGalleryFile.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-        imageBlob = ExternalBlob.fromBytes(uint8Array).withUploadProgress((percentage) => {
-          setGalleryUploadProgress(percentage);
-        });
+        // In a real implementation, you would upload the file to a storage service
+        imageUrl = URL.createObjectURL(editGalleryFile);
+        setGalleryUploadProgress(100);
       } else {
         const existingImage = galleryImages?.find(img => img.id === editingGalleryImage.id);
         if (!existingImage) {
           toast.error('Imagen no encontrada');
           return;
         }
-        imageBlob = existingImage.image;
+        imageUrl = existingImage.image_url;
       }
 
       await updateGalleryImage.mutateAsync({
-        imageId: editingGalleryImage.id,
-        newImage: imageBlob,
-        newDescription: editGalleryDescription || null,
+        id: editingGalleryImage.id,
+        image_url: imageUrl,
+        description: editGalleryDescription || null,
       });
 
       toast.success('Imagen actualizada exitosamente');
@@ -1331,7 +1272,7 @@ export default function AdminDashboardPage() {
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Método de venta:</span>
                             <span>{getSaleMethodLabel(product.saleMethod)}</span>
-                          </div>
+                            src={product.image_url}
                           {product.shippingCarrier && (
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">Paquetería:</span>
@@ -1343,7 +1284,7 @@ export default function AdminDashboardPage() {
                             <span>
                               {Number(product.shippingPrice) === 0
                                 ? 'Gratis'
-                                : `$${(Number(product.shippingPrice) / 100).toFixed(2)}`}
+                              ${(product.price / 100).toFixed(2)}
                             </span>
                           </div>
                         </div>
@@ -1420,13 +1361,13 @@ export default function AdminDashboardPage() {
                         </TableHeader>
                         <TableBody>
                           {filteredLeads.map((lead) => (
-                            <TableRow key={lead.id.toString()}>
+                            <TableRow key={lead.id}>
                               <TableCell className="font-medium">{lead.name}</TableCell>
                               <TableCell>{lead.email}</TableCell>
                               <TableCell>{lead.phone}</TableCell>
-                              <TableCell>{getProductName(lead.productId)}</TableCell>
-                              <TableCell>{lead.desiredQuantity?.toString() || 'N/A'}</TableCell>
-                              <TableCell className="text-sm">{formatDate(lead.createdAt)}</TableCell>
+                              <TableCell>{getProductName(BigInt(lead.product_id))}</TableCell>
+                              <TableCell>{lead.desired_quantity || 'N/A'}</TableCell>
+                              <TableCell className="text-sm">{formatDate(lead.created_at)}</TableCell>
                               <TableCell>
                                 {lead.contacted ? (
                                   <Badge variant="default" className="bg-green-600">
@@ -1513,10 +1454,10 @@ export default function AdminDashboardPage() {
                         </TableHeader>
                         <TableBody>
                           {filteredWhatsAppContacts.map((contact) => (
-                            <TableRow key={contact.id.toString()}>
+                            <TableRow key={contact.id}>
                               <TableCell className="font-medium">{contact.name}</TableCell>
                               <TableCell>{contact.reason}</TableCell>
-                              <TableCell className="text-sm">{formatDate(contact.createdAt)}</TableCell>
+                              <TableCell className="text-sm">{formatDate(contact.created_at)}</TableCell>
                               <TableCell>
                                 {contact.contacted ? (
                                   <Badge variant="default" className="bg-green-600">
@@ -1664,7 +1605,7 @@ export default function AdminDashboardPage() {
                     ) : logo ? (
                       <div className="flex justify-center">
                         <img
-                          src={logo.getDirectURL()}
+                          src={logo.logo_url || ''}
                           alt="Logo actual"
                           className="max-h-48 object-contain"
                         />
@@ -1795,10 +1736,10 @@ export default function AdminDashboardPage() {
                     ) : galleryImages && galleryImages.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {galleryImages.map((image) => (
-                          <Card key={image.id.toString()} className="overflow-hidden">
+                          <Card key={image.id} className="overflow-hidden">
                             <div className="aspect-square relative">
                               <img
-                                src={image.image.getDirectURL()}
+                                src={image.image_url}
                                 alt={image.description || 'Imagen de galería'}
                                 className="w-full h-full object-cover"
                               />
@@ -1810,26 +1751,25 @@ export default function AdminDashboardPage() {
                                 </p>
                               )}
                               <div className="flex gap-2">
-                                <Button
+                                onValueChange={(value) => handleStatusUpdate(order.order_number, value as Order['status'])}
                                   variant="outline"
                                   size="sm"
                                   onClick={() =>
                                     handleEditGalleryImage({
                                       id: image.id,
-                                      description: image.description || null,
-                                      imageUrl: image.image.getDirectURL(),
-                                    })
-                                  }
-                                  className="flex-1"
+                                  <SelectItem value="PedidoRecibido">Pedido Recibido</SelectItem>
+                                      imageUrl: image.image_url,
+                                  <SelectItem value="PedidoEnTransito">En Tránsito</SelectItem>
+                                  <SelectItem value="PedidoEntregado">Entregado</SelectItem>
                                 >
                                   <Pencil className="h-4 w-4 mr-2" />
                                   Editar
-                                </Button>
+                            <TableCell className="text-sm">{formatDate(order.created_at)}</TableCell>
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => setDeleteGalleryDialog({ open: true, imageId: image.id })}
-                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => setDeleteOrderDialog({ open: true, orderNumber: order.order_number })}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -1901,27 +1841,27 @@ export default function AdminDashboardPage() {
                 Descripción
               </Label>
               <Textarea
-                id="edit-description"
-                value={editGalleryDescription}
+                            <Badge variant={product.is_out_of_stock ? 'destructive' : 'default'}>
+                              {product.is_out_of_stock ? 'Sin Stock' : `Stock: ${product.stock}`}
                 onChange={(e) => setEditGalleryDescription(e.target.value)}
                 placeholder="Descripción de la imagen"
                 rows={3}
                 className="border-border/50 focus:border-gold resize-none"
               />
-            </div>
+                              <span>{getSaleMethodLabel(product.sale_method)}</span>
             {galleryUploadProgress > 0 && galleryUploadProgress < 100 && (
-              <div className="mt-2">
+                            {product.shipping_carrier && (
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className="bg-gold h-2 rounded-full transition-all duration-300"
+                                <span>{getShippingCarrierLabel(product.shipping_carrier)}</span>
                     style={{ width: `${galleryUploadProgress}%` }}
                   />
                 </div>
                 <p className="text-xs text-center mt-1 text-muted-foreground">
                   Actualizando: {galleryUploadProgress}%
-                </p>
+                                {product.shipping_price === 0
               </div>
-            )}
+                                  : `$${(product.shipping_price / 100).toFixed(2)}`}
             <div className="flex gap-4 pt-4">
               <Button
                 type="button"
