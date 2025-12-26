@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase, type Product, type Order, type Lead, type WhatsAppContact, type SiteSetting } from '../lib/supabase';
+import { supabase, type Product, type Order, type Lead, type WhatsAppContact, type SiteSetting, type GalleryImage } from '../lib/supabase';
 
 // Products
 export function useGetAllProducts() {
@@ -497,6 +497,30 @@ export function useUpdateLogo() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['logo'] });
+    },
+  });
+}
+
+// Gallery Images
+export function useAddGalleryImage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (imageData: {
+      image_url: string;
+      description?: string;
+    }) => {
+      const { data, error } = await supabase
+        .from('gallery_images')
+        .insert([imageData])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['galleryImages'] });
     },
   });
 }

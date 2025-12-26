@@ -67,6 +67,12 @@ export interface Lead {
   created_at: string;
 }
 
+export interface GalleryImage {
+  id: string;
+  image_url: string;
+  description?: string;
+  created_at: string;
+}
 export interface SiteSetting {
   id: string;
   key: string;
