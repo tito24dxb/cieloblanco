@@ -67,6 +67,13 @@ export interface Lead {
   created_at: string;
 }
 
+export interface SiteSetting {
+  id: string;
+  key: string;
+  logo_url?: string;
+  created_at: string;
+  updated_at: string;
+}
 export interface WhatsAppContact {
   id: string;
   name: string;
