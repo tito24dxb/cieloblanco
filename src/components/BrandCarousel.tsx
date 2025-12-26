@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import type { CarouselApi } from '@/components/ui/carousel';
-import FadeIn from './FadeIn';
 
 const carouselImages = [
   {

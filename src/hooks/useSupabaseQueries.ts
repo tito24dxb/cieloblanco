@@ -533,7 +533,28 @@ export function useAddGalleryImage() {
         .insert([imageData])
         .select()
         .single();
-      
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['galleryImages'] });
+    },
+  });
+}
+
+export function useUpdateGalleryImage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...imageData }: Partial<GalleryImage> & { id: string }) => {
+      const { data, error } = await supabase
+        .from('gallery_images')
+        .update(imageData)
+        .eq('id', id)
+        .select()
+        .single();
+
       if (error) throw error;
       return data;
     },
@@ -552,7 +573,7 @@ export function useDeleteGalleryImage() {
         .from('gallery_images')
         .delete()
         .eq('id', imageId);
-      
+
       if (error) throw error;
       return true;
     },
