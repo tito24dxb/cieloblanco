@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase, type Product, type Order, type Lead, type WhatsAppContact } from '../lib/supabase';
+import { supabase, type Product, type Order, type Lead, type WhatsAppContact, type SiteSetting } from '../lib/supabase';
 
 // Products
 export function useGetAllProducts() {
@@ -99,6 +99,32 @@ export function useDeleteProduct() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
+}
+
+export function useUpdateProductStock() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ productId, stock }: { productId: string; stock: number }) => {
+      const { data, error } = await supabase
+        .from('products')
+        .update({ 
+          stock,
+          is_out_of_stock: stock === 0,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', productId)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product', data.id] });
     },
   });
 }
@@ -402,6 +428,75 @@ export function useDeleteWhatsAppContact() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['whatsappContacts'] });
+    },
+  });
+}
+
+// Site Settings / Logo
+export function useGetLogo() {
+  return useQuery<SiteSetting | null>({
+    queryKey: ['logo'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('*')
+        .eq('key', 'logo')
+        .single();
+      
+      if (error) {
+        if (error.code === 'PGRST116') return null; // Not found
+        throw error;
+      }
+      return data;
+    },
+    staleTime: 0,
+    refetchOnMount: 'always',
+  });
+}
+
+export function useUpdateLogo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (logoUrl: string) => {
+      // First try to update existing logo setting
+      const { data: existingData } = await supabase
+        .from('site_settings')
+        .select('*')
+        .eq('key', 'logo')
+        .single();
+
+      if (existingData) {
+        // Update existing
+        const { data, error } = await supabase
+          .from('site_settings')
+          .update({ 
+            logo_url: logoUrl,
+            updated_at: new Date().toISOString()
+          })
+          .eq('key', 'logo')
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return data;
+      } else {
+        // Create new
+        const { data, error } = await supabase
+          .from('site_settings')
+          .insert([{
+            key: 'logo',
+            logo_url: logoUrl
+          }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return data;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['logo'] });
     },
   });
 }
