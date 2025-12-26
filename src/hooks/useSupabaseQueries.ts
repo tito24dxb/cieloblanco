@@ -502,6 +502,24 @@ export function useUpdateLogo() {
 }
 
 // Gallery Images
+export function useGetAllGalleryImages() {
+  return useQuery<GalleryImage[]>({
+    queryKey: ['galleryImages'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('gallery_images')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+  });
+}
+
 export function useAddGalleryImage() {
   const queryClient = useQueryClient();
 
@@ -518,6 +536,25 @@ export function useAddGalleryImage() {
       
       if (error) throw error;
       return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['galleryImages'] });
+    },
+  });
+}
+
+export function useDeleteGalleryImage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (imageId: string) => {
+      const { error } = await supabase
+        .from('gallery_images')
+        .delete()
+        .eq('id', imageId);
+      
+      if (error) throw error;
+      return true;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['galleryImages'] });
