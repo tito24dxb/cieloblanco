@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;500;600&display=swap');
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -16,7 +18,7 @@
     --secondary-foreground: 0 0% 0%;
     --muted: 0 0% 90%;
     --muted-foreground: 0 0% 40%;
-    --accent: 40 100% 50%;
+    --accent: 43 74% 66%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -24,7 +26,7 @@
     --input: 0 0% 85%;
     --ring: 0 0% 0%;
     --radius: 0.5rem;
-    --gold: 40 100% 50%;
+    --gold: 43 74% 66%;
     --gold-foreground: 0 0% 100%;
   }
 
@@ -41,14 +43,14 @@
     --secondary-foreground: 0 0% 100%;
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 60%;
-    --accent: 40 100% 50%;
+    --accent: 43 74% 66%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 20%;
     --input: 0 0% 20%;
     --ring: 0 0% 100%;
-    --gold: 40 100% 50%;
+    --gold: 43 74% 66%;
     --gold-foreground: 0 0% 100%;
   }
 }
@@ -60,17 +62,12 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Cinzel', serif;
+    font-weight: 300;
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&display=swap');
-
-body {
-  font-family: 'Cinzel', serif;
-}
-
 .shadow-luxury {
-  box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px -8px rgba(0, 0, 0, 0.08);
 }
 
 .animate-in {
@@ -88,4 +85,55 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Luxury minimalist styling */
+.font-light {
+  font-weight: 300;
+}
+
+.font-normal {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+/* Override default font weights for luxury feel */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+}
+
+.font-serif {
+  font-family: 'Cinzel', serif;
+}
+
+/* Soft golden accent color */
+.text-gold {
+  color: hsl(43, 74%, 66%);
+}
+
+.bg-gold {
+  background-color: hsl(43, 74%, 66%);
+}
+
+.border-gold {
+  border-color: hsl(43, 74%, 66%);
+}
+
+.hover\:bg-gold\/10:hover {
+  background-color: hsl(43, 74%, 66%, 0.1);
+}
+
+.hover\:bg-gold\/90:hover {
+  background-color: hsl(43, 74%, 66%, 0.9);
+}
+
+.focus\:border-gold:focus {
+  border-color: hsl(43, 74%, 66%);
 }
