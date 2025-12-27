@@ -507,7 +507,7 @@ return true;
 
 const getProductName = (productId: bigint) => {
 const product = products?.find(p => p.id === productId);
-return product?.name || Producto |#${productId};
+return product?.name || `Producto #${productId}`;
 };
 
 const formatDate = (timestamp: bigint) => {
