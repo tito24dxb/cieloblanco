@@ -274,6 +274,17 @@ try {
     return;
   }
 
+  let image;
+
+if (productForm.image) {
+  image = productForm.image; // this is already the correct file
+} else if (editingProduct) {
+  image = editingProduct.image;
+} else {
+  throw new Error('No hay imagen disponible');
+}
+
+
   const saleMethodMap = {
     internal: SaleMethod.internal,
     mercadoLibre: SaleMethod.mercadoLibre,
