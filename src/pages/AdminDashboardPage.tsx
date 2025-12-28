@@ -284,7 +284,6 @@ if (productForm.image) {
   throw new Error('No hay imagen disponible');
 }
 
-
   const saleMethodMap = {
     internal: SaleMethod.internal,
     mercadoLibre: SaleMethod.mercadoLibre,
