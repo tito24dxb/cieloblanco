@@ -314,10 +314,8 @@ if (productForm.image) {
   name: productForm.name,
   description: productForm.description,
 
-  price: Math.round(Number(productForm.price) * 100), // cents as number
+  price: Math.round(Number(productForm.price) * 100),
   currency: 'MXN',
-
-image: editingProduct?.image ?? null,
 
   saleMethod: saleMethodMap[productForm.saleMethod],
 
@@ -332,11 +330,10 @@ image: editingProduct?.image ?? null,
   stock: Number(productForm.stock || 0),
   isOutOfStock: productForm.isOutOfStock,
 
-
   shippingPrice: Math.round(Number(productForm.shippingPrice || 0) * 100),
-
   shippingCarrier: shippingCarrierMap[productForm.shippingCarrier] || null,
 };
+
 
 
   if (editingProduct) {
