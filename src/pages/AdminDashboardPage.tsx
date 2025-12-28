@@ -314,7 +314,7 @@ if (productForm.image) {
     description: productForm.description,
     price: BigInt(Math.round(parseFloat(productForm.price) * 100)),
     currency: 'MXN',
-    image: imageBlob,
+    image: image,
     saleMethod: saleMethodMap[productForm.saleMethod],
     mercadoLibreUrl: (productForm.saleMethod === 'mercadoLibre' || productForm.saleMethod === 'both') ? productForm.mercadoLibreUrl : null,
     paymentMethods: productForm.paymentMethods,
