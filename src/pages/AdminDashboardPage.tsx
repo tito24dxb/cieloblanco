@@ -319,10 +319,7 @@ if (productForm.image) {
 
   saleMethod: saleMethodMap[productForm.saleMethod],
 
-  mercadoLibreUrl:
-    (productForm.saleMethod === 'mercadoLibre' || productForm.saleMethod === 'both')
-      ? productForm.mercadoLibreUrl
-      : null,
+  
 
   paymentMethods: productForm.paymentMethods,
   specifications: productForm.specifications,
