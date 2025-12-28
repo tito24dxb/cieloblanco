@@ -332,11 +332,6 @@ if (productForm.image) {
   stock: Number(productForm.stock || 0),
   isOutOfStock: productForm.isOutOfStock,
 
-  combinationType: combinationTypeMap[productForm.combinationType],
-
-  combinedProductId: productForm.combinedProductId
-    ? Number(productForm.combinedProductId)
-    : null,
 
   shippingPrice: Math.round(Number(productForm.shippingPrice || 0) * 100),
 
