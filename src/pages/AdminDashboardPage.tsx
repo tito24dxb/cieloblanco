@@ -1678,7 +1678,7 @@ Cerrar Sesión
                 ) : logo ? (
                   <div className="flex justify-center">
                     <img
-                      src={logo.getDirectURL()}
+                      src={logo.logo_url}
                       alt="Logo actual"
                       className="max-h-48 object-contain"
                     />
