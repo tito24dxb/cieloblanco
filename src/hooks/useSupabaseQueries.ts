@@ -471,7 +471,7 @@ export function useUpdateLogo() {
         const { data, error } = await supabase
           .from('site_settings')
           .update({ 
-            logo_url: logoUrl,
+            value: logoUrl,
             updated_at: new Date().toISOString()
           })
           .eq('key', 'logo')
@@ -486,7 +486,7 @@ export function useUpdateLogo() {
           .from('site_settings')
           .insert([{
             key: 'logo',
-            logo_url: logoUrl
+            value: logoUrl
           }])
           .select()
           .single();
