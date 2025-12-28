@@ -274,20 +274,6 @@ try {
     return;
   }
 
-  let imageBlob: ExternalBlob;
-
-  if (productForm.image) {
-    const arrayBuffer = await productForm.image.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    imageBlob = ExternalBlob.fromBytes(uint8Array).withUploadProgress((percentage) => {
-      setUploadProgress(percentage);
-    });
-  } else if (editingProduct) {
-    imageBlob = editingProduct.image;
-  } else {
-    throw new Error('No hay imagen disponible');
-  }
-
   const saleMethodMap = {
     internal: SaleMethod.internal,
     mercadoLibre: SaleMethod.mercadoLibre,
