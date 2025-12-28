@@ -309,23 +309,40 @@ if (productForm.image) {
   };
 
   const productData = {
-    id: editingProduct?.id || 0n,
-    name: productForm.name,
-    description: productForm.description,
-    price: BigInt(Math.round(parseFloat(productForm.price) * 100)),
-    currency: 'MXN',
-    image: image,
-    saleMethod: saleMethodMap[productForm.saleMethod],
-    mercadoLibreUrl: (productForm.saleMethod === 'mercadoLibre' || productForm.saleMethod === 'both') ? productForm.mercadoLibreUrl : null,
-    paymentMethods: productForm.paymentMethods,
-    specifications: productForm.specifications,
-    stock: BigInt(productForm.stock || '0'),
-    isOutOfStock: productForm.isOutOfStock,
-    combinationType: combinationTypeMap[productForm.combinationType],
-    combinedProductId: productForm.combinedProductId ? BigInt(productForm.combinedProductId) : null,
-    shippingPrice: BigInt(Math.round(parseFloat(productForm.shippingPrice || '0') * 100)),
-    shippingCarrier: shippingCarrierMap[productForm.shippingCarrier] || null,
-  };
+  id: editingProduct?.id ?? null,
+
+  name: productForm.name,
+  description: productForm.description,
+
+  price: Math.round(Number(productForm.price) * 100), // cents as number
+  currency: 'MXN',
+
+  image: image,
+
+  saleMethod: saleMethodMap[productForm.saleMethod],
+
+  mercadoLibreUrl:
+    (productForm.saleMethod === 'mercadoLibre' || productForm.saleMethod === 'both')
+      ? productForm.mercadoLibreUrl
+      : null,
+
+  paymentMethods: productForm.paymentMethods,
+  specifications: productForm.specifications,
+
+  stock: Number(productForm.stock || 0),
+  isOutOfStock: productForm.isOutOfStock,
+
+  combinationType: combinationTypeMap[productForm.combinationType],
+
+  combinedProductId: productForm.combinedProductId
+    ? Number(productForm.combinedProductId)
+    : null,
+
+  shippingPrice: Math.round(Number(productForm.shippingPrice || 0) * 100),
+
+  shippingCarrier: shippingCarrierMap[productForm.shippingCarrier] || null,
+};
+
 
   if (editingProduct) {
     await updateProduct.mutateAsync(productData);
