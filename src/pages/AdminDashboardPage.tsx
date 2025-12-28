@@ -319,9 +319,6 @@ if (productForm.image) {
 
   stock: Number(productForm.stock || 0),
  
-
-  shippingPrice: Math.round(Number(productForm.shippingPrice || 0) * 100),
-  shippingCarrier: shippingCarrierMap[productForm.shippingCarrier] || null,
 };
 
 
