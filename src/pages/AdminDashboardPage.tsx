@@ -317,9 +317,6 @@ if (productForm.image) {
   price: Math.round(Number(productForm.price) * 100),
   currency: 'MXN',
 
-  saleMethod: saleMethodMap[productForm.saleMethod],
-
-
   stock: Number(productForm.stock || 0),
  
 
