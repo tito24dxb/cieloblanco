@@ -319,10 +319,6 @@ if (productForm.image) {
 
   saleMethod: saleMethodMap[productForm.saleMethod],
 
-  
-
-  paymentMethods: productForm.paymentMethods,
-  specifications: productForm.specifications,
 
   stock: Number(productForm.stock || 0),
  
