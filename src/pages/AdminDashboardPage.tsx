@@ -328,7 +328,7 @@ if (productForm.image) {
   specifications: productForm.specifications,
 
   stock: Number(productForm.stock || 0),
-  isOutOfStock: productForm.isOutOfStock,
+ 
 
   shippingPrice: Math.round(Number(productForm.shippingPrice || 0) * 100),
   shippingCarrier: shippingCarrierMap[productForm.shippingCarrier] || null,
